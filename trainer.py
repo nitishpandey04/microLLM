@@ -22,8 +22,10 @@ class Trainer:
         self._prepare_dataloader()
 
     def train(self):
-        for step in range(self.args.num_steps):
-            src, tgt = next(self.dataloader)
+        for step, (src, tgt) in enumerate(self.dataloader):
+            if step == self.args.num_steps:
+                break
+                
             B, T = src.shape
             logits = self.model(src)
 
@@ -32,14 +34,20 @@ class Trainer:
                 tgt.view(B * T,),
                 label_smoothing=self.args.label_smoothing
             )
-
+            
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-
+            
             if step % 100 == 0:
                 print(f"step: {step + 1:2d} | loss: {loss:.5f}")
-
+        
+    def _save_checkpoint(self):
+        pass
+        
+    def _load_checkpoint(self):
+        pass
+        
     def _prepare_dataloader(self):
         self.dataloader = tokenizing_distributed_data_loader(
             B=self.args.batch_size,
@@ -49,3 +57,4 @@ class Trainer:
             tokenizer_batch_size=64,
             device=self.args.device
         )
+        

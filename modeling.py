@@ -92,12 +92,8 @@ class DecoderLayer(nn.Module):
         self.mlp_layer = MLPLayer(config)
 
     def forward(self, inputs: torch.Tensor, cos_sin: tuple) -> torch.Tensor:
-        res = inputs
-        x = self.attn_layer(self.pre_attn_norm(res), cos_sin)
-        x += res
-        res = x
-        x = self.mlp_layer(self.pre_mlp_norm(res))
-        x += res
+        x = x + self.attn_layer(self.pre_attn_norm(x), cos_sin)
+        x = x + self.mlp_layer(self.pre_mlp_norm(x))
         return x
 
 
